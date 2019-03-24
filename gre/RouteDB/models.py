@@ -12,6 +12,10 @@ class Project(models.Model):
     main_track = models.ForeignKey('Track', on_delete=models.SET_NULL, null=True, blank=True, default=None)
     main_sound = models.ForeignKey('Sound', on_delete=models.SET_NULL, null=True, blank=True, default=None)
     track_b = models.ForeignKey('Track_B', on_delete=models.SET_NULL, null=True, blank=True, default=None)
+    track_k = models.ForeignKey('Track_K', on_delete=models.SET_NULL, null=True, blank=True, default=None)
+    track_t = models.ForeignKey('Track_K', on_delete=models.SET_NULL, null=True, blank=True, default=None)
+
+
 
 class Folder(models.Model): # Abstract
     name = models.TextField(unique=True)
