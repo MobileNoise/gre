@@ -155,13 +155,13 @@ class AlternativeTextureDial(Dial):
 class SignalConfigFile(File):
     pass
 
-class SignalConfigArrayEntry(ArrayEntry):  #Abstract
+class SignalConfigArrayEntry(ArrayEntry):  # Abstract
     sigcfg = models.ForeignKey('SignalConfigFile', on_delete=models.CASCADE)
 
     class Meta:
         abstract = True
 
-class SignalConfigOrderedArrayEntry(OrderedArrayEntry):
+class SignalConfigOrderedArrayEntry(OrderedArrayEntry): # Abstract
     sigcfg = models.ForeignKey('SignalConfigFile', on_delete=models.CASCADE)
 
     class Meta:
@@ -282,8 +282,11 @@ class G_TrackSectionInfo(models.Model):
     section_file = models.ForeignKey('G_TrackSectionFile', on_delete=models.CASCADE)
     text = models.TextField(null=True, blank=True, default=None)
 
-class G_TrackSectionEntry(OrderedArrayEntry):
+class G_TrackSectionEntry(OrderedArrayEntry): # Abstract
     section_file = models.ForeignKey('G_TrackSectionFile', on_delete=models.CASCADE)
+	
+	class Meta:
+        abstract = True
 
 class G_TrackSection(G_TrackSectionEntry):
     gauge = models.DecimalField()
@@ -508,7 +511,7 @@ class TrItemIdList(models.Model): # Abstract
     class Meta:
         abstract = True
 
-class WorldItem(models.Model):
+class WorldItem(models.Model): # Abstract
     world_file = models.ForeignKey('WorldFile', on_delete=models.CASCADE)
     uid = models.IntegerField()
     static_flag = models.ForeignKey('StaticFlag', on_delete=models.SET_NULL, null=True, blank=True, default=None)
@@ -671,11 +674,56 @@ class Hazard(WorldMaterialItem):
 
 ### TRACK DB ###
 
-class TrackNode(models.Model):
+class TrackDataBaseFile(File):
+    serial = models.IntegerField()
+	
+class TrackNodeType(Dial):
     pass
+	
+class TrackNode(OrderedArrayEntry):
+    file_name = models.ForeignKey('TrackDataBaseFile', on_delete=models.CASCADE)
+	type = models.ForeignKey('TrackNodeType', on_delete=models.CASCADE)
+		
+class TrPin(models.Model): # Abstract
+	track_node = models.ForeignKey('TrackNode', on_delete=models.CASCADE)
+	world_tile = models.ForeignKey('WorldFile', on_delete=models.CASCADE, null=True, blank=True, default=None)
+	world_uid = models.IntegerField() # TODO use PolymorphicModel
+	is_opposite_end = models.BooleanField()	
 
+	class Meta:
+        abstract = True
+		
+class TrPinBegin(TrPin):
+	pass	
+	
+class TrPinEnd(TrPin):
+	pass
+		
+class TrUidSection(models.Model):
+	track_node = models.ForeignKey('TrackNode', on_delete=models.CASCADE)
+	world_tile = models.ForeignKey('WorldFile', on_delete=models.CASCADE, null=True, blank=True, default=None)
+	world_uid = models.IntegerField() # TODO use PolymorphicModel
+	world_tile_2 = models.ForeignKey('WorldFile', on_delete=models.CASCADE, null=True, blank=True, default=None)
+	position = models.PointField(dim=3)
+	rotation = models.PointField(dim=3)
+	
+class TrVectorSection(TrUidSection):
+	track_section = models.ForeignKey('G_TrackSection', on_delete=models.CASCADE)
+	track_shape = models.ForeignKey('G_TrackShape', on_delete=models.CASCADE)
+	flag_1 = models.PositiveSmallIntegerField()
+	flag_2 = models.PositiveSmallIntegerField()
+	flag_2 = models.CharField(max_length=2)
+	
+class TrItemRef(models.Model):
+	track_section = models.ForeignKey('TrVectorSection', on_delete=models.SET_NULL, null=True, blank=True, default=None)
+	track_item_id = models.IntegerField() # TODO use PolymorphicModel
+	
 class TrackItem(models.Model): # Abstract?
-    pass
+    tritem_id = models.IntegerField() # TODO use PolymorphicModel
+	sdata_1 = 
+	
+	class Meta:
+        abstract = True
 
 class SidingItem(TrackItem):
     pass
